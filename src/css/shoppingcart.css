@@ -1,0 +1,53 @@
+.mainParentShoppingCart{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin: 20px;
+}
+
+.savedProductsParent{
+  display: flex;
+  height: 100%;
+  position: absolute;
+  flex-direction: column;
+  padding: 0;
+  width: fit-content;
+  row-gap: 10px;
+  overflow: auto;
+  list-style: none;
+  right:  0%;
+  border-style: ridge;
+}
+
+.savedProduct{
+  height: fit-content;
+  width: fit-content;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.savedProductImage{
+  width: 250px;
+  height:200px;
+}
+.clickedSavedProduct{
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.clickedImg{
+  width: 500px;
+  height: 500px;
+  align-self: center;
+}
+
+
+.clickedProductCard{
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+
