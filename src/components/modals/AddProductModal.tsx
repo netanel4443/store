@@ -31,7 +31,7 @@ const _onShow=()=>{
 const _onAddAction=()=>{
   
   if(imageFile){
-    
+    /*TODO: fix update and upload*/
     dispatch(actions.updateProduct(categories.get(productDetails.category)!!,productDetails,imageFile))
   }
 }

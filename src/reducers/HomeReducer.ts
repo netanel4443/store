@@ -4,6 +4,7 @@ import {AddProductModalErrors} from '../data/AddProductModalErrors'
 import {HomeReducer} from './types/index'
 
 const initialState:HomeReducer={
+  //Map<category name,category Id>
   categories:new Map<string,string>(),
   loadingSpinnerVisibility:false,
   addProductModalVisibility:false,
@@ -29,11 +30,13 @@ export default (state:HomeReducer=initialState,action:any)=>{
       ...state,
       productsDetailsFromDb:action.products
     }  
+
   case types.SHOW_OR_HIDE_SPINNER:
     return{
       ...state,
       loadingSpinnerVisibility:action.visibility
-    } 
+    }
+
   case types.SHOW_ADD_PRODUCT_MODAL_VISIBILITY:
     return{
       ...state,

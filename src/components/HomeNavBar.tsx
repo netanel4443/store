@@ -55,7 +55,7 @@ function HomeNavBar() {
   return (
     <div className='mainNav'>
       <div className='categoriesMenu'>
-        {categoriesList()}
+        {/* {categoriesList()} */}
       </div>
 
       <div className='add-category-btn'>

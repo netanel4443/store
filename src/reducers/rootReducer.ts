@@ -1,11 +1,11 @@
 import {combineReducers} from 'redux'
 import HomeReducer from './HomeReducer'
-import shoppingCartReducer from './shoppingCartReducer'
+import ShoppingCartReducer from './ShoppingCartReducer'
 import TopNavBarReducer from './TopNavBarReducer'
 
 const rootReducer=combineReducers({
   homeReducer:HomeReducer,
-  shoppingCartReducer:shoppingCartReducer,
+  shoppingCartReducer:ShoppingCartReducer,
   topNavBarReducer:TopNavBarReducer
 })
 export type RootState = ReturnType<typeof rootReducer>

@@ -18,8 +18,8 @@ export const deleteProductCategory=(category:string)=>{
   return database.collection(CATEGORIES).doc(category)
 }
 
-export const getProducts=(categoryId:string)=>{
-  return database.collection(PRODUCTS).doc(categoryId).collection(PRODUCTS)
+export const getProducts=(path:string)=>{
+  return database.collection(PRODUCTS).doc(path).get()
 }
 
 export const getAllProducts=()=>{
@@ -34,14 +34,20 @@ export const uploadProductImage=(image:File)=>{
   return storage.ref(image.name).put(image)
 }
 
-export const uploadProductDetails=(categoryId:string)=>{
-   return database.collection(CATEGORIES).doc(categoryId).collection(PRODUCTS)
+
+export const uploadProductDetails=()=>{
+   return database.collection(PRODUCTS)
 }
 
-export const getShoppingCartProducts=(pathsToProduct:string):
-        Promise<firestore.DocumentSnapshot<firestore.DocumentData>>=>{
+export const uploadProductRefToCategory=(categoryId:string,path:string)=>{
+  return database.collection(CATEGORIES).doc(categoryId).collection(PRODUCTS).doc(path)
 
-  return database.collection(PRODUCTS).doc(pathsToProduct).get()
+}
+
+export const getShoppingCartProducts=(pathToProduct:string):
+        Promise<firestore.DocumentSnapshot<firestore.DocumentData>>=>{
+          console.log(pathToProduct)
+  return database.collection(PRODUCTS).doc(pathToProduct).get()
 }
 
 export const getStoreOwnerDetail=()=>{

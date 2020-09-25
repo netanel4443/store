@@ -4,7 +4,6 @@ import { AddProductModalErrors } from '../data/AddProductModalErrors'
 import { errorConsoleIfDebug, logConsoleIfDebug } from '../utils/consoleUtils'
 import * as repo from '../data/firebaseOperations'
 import * as localRepo from '../data/localdatabase/cachedData'
-import { stringify } from 'querystring'
 
 export const addProductCategoryToDb=(category:string,)=>{
   return (dispatch:any)=>{
@@ -15,10 +14,12 @@ export const addProductCategoryToDb=(category:string,)=>{
 
         repo.addCategory().doc().set({category:category})
           .then(()=>{
-            dispatch(showLoadingModal(false))
             dispatch(disableAddCategoryModalBtn(false))
           })
           .catch((e)=>errorConsoleIfDebug(e))
+          .finally(()=>{
+            dispatch(showLoadingModal(false))
+          })
       )
     }
   }
@@ -57,48 +58,48 @@ export const getCategoriesFromDb=()=>{
 }
 
 export const getAllProductsFromDb=()=>{
-  return (dispatch:any)=>{
-    const products=new Map<string,Map<string,ProductDetails>>() //Map<category id,Product details>
+  return (dispatch:any,getState:any)=>{
+    const productsMap=new Map<string,Map<string,ProductDetails>>() //Map<category id,Product details>
     const getAllproducts= repo.getAllProducts()
     return(
      getAllproducts.get().then((snapshot1)=>{
         
      snapshot1.forEach(categoryId=>{
-       const tmpMap=new Map<string,ProductDetails>()
-      getAllproducts.doc(categoryId.id).collection('products').get()
-            .then(productSnap=> productSnap.forEach(product=>{
-                const data=product.data() as ProductDetails
-                tmpMap.set(product.id,data)
-              
-            }))
-            .catch(e=>errorConsoleIfDebug(e))  
-            products.set(categoryId.id,tmpMap)
-            logConsoleIfDebug(products)
-     })     
+       const tmpArr:string[]=[]
+       const id=categoryId.id
+       getAllproducts.doc(id).collection('products').get()
+            .then(productSnap=>{ 
+              productSnap.forEach(product=>{
+                const data=product.id as string
+                tmpArr.push(data)
+              })
+              return  tmpArr
+            })
+            .then((stringArr)=>getProductsFromPath(stringArr))
+            .then(products=>{
+              productsMap.set(id,products)
+              dispatch({ type:types.GET_PRODUCTS, products:new Map(productsMap)})
+            })
+            .catch(e=>errorConsoleIfDebug(e))
+            .finally(()=>dispatch(showLoadingModal(false)))
+     })   
       })
     )
   }
 }
 
-
-
-export const getProductsFromDb=(categoryId:string)=>{
-  return (dispatch:any)=>{
-    const products=new Map<string,ProductDetails>() //Map<category id,Product details>
-    return(
-      repo.getProducts(categoryId).get()
-      .then((snapshot)=>{
-          snapshot.forEach(product => {
-            const data=product.data() as ProductDetails
-            products.set(product.id,data)
-          });
-          dispatch({
-            type:types.GET_PRODUCTS,
-            products:products
-          })
-      }).catch(e=>errorConsoleIfDebug(e))
-    )
-  }
+export const getProductsFromPath=(paths:string[])=>{
+  paths.map(path=> console.log(path))
+  const queryArr=paths.map(path=>repo.getProducts(path))
+  return Promise.all(queryArr)
+          .then((querySnapshots)=>{
+              const productDetailsMap=new Map<string,ProductDetails>()
+              querySnapshots.forEach(product=>{
+                productDetailsMap.set(product.id,product.data() as ProductDetails)  
+              })
+              // new map becuase we want to make redux render it's data , because we dispatch a few times
+             return productDetailsMap 
+          })  
 }
 
 const categ=(categories:Map<string,string>)=>{
@@ -119,7 +120,6 @@ export const deleteProductCategoryFromDb=(category:string)=>{
   return(dispatch:any)=>{
     return(
       dispatch(showLoadingModal(true)),
-      
       repo.deleteProductCategory(category).delete()
       .catch((e)=>dispatch(showModalMessageToUser('Could not delete.',true)))
       .finally(()=>dispatch(showLoadingModal(false)))
@@ -197,16 +197,21 @@ export const uploadProductDetailsToDb=(categoryId:string,productDetails:ProductD
  
     const productDetailsCopy=Object.assign({},productDetails)
     return(
-      repo.uploadProductDetails(categoryId).add(productDetailsCopy)
-      .then(()=>logConsoleIfDebug('Product uploaded successfuly'))
+      repo.uploadProductDetails().add(productDetailsCopy)
+      .then((docRef)=>uploadProductPathToCategoryDb(categoryId,docRef.id))
       .catch(e=>errorConsoleIfDebug(e))
-      .finally(()=>{ 
+      .finally(()=>{
+        logConsoleIfDebug('Product uploaded successfuly')
         dispatch(showLoadingModal(false))
         dispatch(showAddProductModalVisibility(false,new ProductDetails()))
       }
       )
     )
   
+}
+
+export const uploadProductPathToCategoryDb=(categoryId:string,path:string)=>{
+ return repo.uploadProductRefToCategory(categoryId,path).set({})
 }
 
 export const addProductModalErrors=(errorMessages:AddProductModalErrors)=>{

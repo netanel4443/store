@@ -25,3 +25,9 @@ export interface TopNavBarReducer{
   isLoading:boolean,
   isEditSODBtnEnabled:boolean
 }
+
+export interface ShoppingCartReducer{
+savedProducts: Map<string,ProductDetails>,
+totalPrice:number,
+clickedProductKey:string | undefined
+}

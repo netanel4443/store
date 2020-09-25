@@ -11,8 +11,8 @@ import AddProductModal from './modals/AddProductModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlusCircle ,faEdit,faCartPlus } from '@fortawesome/free-solid-svg-icons'
 import { ProductDetails } from '../data/ProductDetails'
-import { logConsoleIfDebug } from '../utils/consoleUtils'
 import { RootState } from '../reducers/rootReducer'
+import '../utils/mapUtils'
 
 function Home() {
 
@@ -22,18 +22,17 @@ function Home() {
     isLoading:state.homeReducer.loadingSpinnerVisibility,
     modalsMessage:state.homeReducer.modalsMessage,
     messageModalVisibility:state.homeReducer.messageModalVisibility,
-   
   }),shallowEqual)
 
+  const categories:Map<string,string>=useSelector((state:RootState)=>state.homeReducer.categories)
   const products:Map<string,Map<string,ProductDetails>>=
-            useSelector((state:RootState)=> state.homeReducer.productsDetailsFromDb)
+           useSelector((state:RootState)=> state.homeReducer.productsDetailsFromDb)
   
 
   useEffect(() => { 
-    // if(products.size==0){
+     if(products.size==0){
        dispatch(actions.getAllProductsFromDb())
-       logConsoleIfDebug('effect')
-    // }
+     }
   }, [])
 
 
@@ -48,28 +47,46 @@ function Home() {
     dispatch(actions.showAddProductModalVisibility(true,product))
   }
 
-  const _productsByCategory=()=>{
-    const prod:any=[]
-    products.forEach((product) => {
-      prod.push (
-        <div className='product' key={product.productName}>
-          <img className='productImage' src={product.imageUrl}/>
+
+  const tes=(product:Map<string,ProductDetails>)=>{
+    const tmpArr:any=[]
+    product.forEach((prod,productId)=>{
+      tmpArr.push(
+        <li> 
+        <div className='product' key={prod.productName}>
+          <img className='productImage' src={prod.imageUrl}/>
           <div  className="cardy">
           <div className="card-body">
-            <h5 className="card-title">{product.productName}</h5>
-            <p className="card-text">{product.productDescription}</p>
-            <p className='categoryPrice' style={{color:'lightgreen'}}>{product.price}$</p>
+            <h5 className="card-title" style={{color:'white'}}>{prod.productName}</h5>
+            <p className="card-text" style={{color:'white'}}>{prod.productDescription}</p>
+            <p className='categoryPrice' style={{color:'lightskyblue'}}>{prod.price}$</p>
           </div>
           </div>
           <div className='productOptionsBar'>
-          <FontAwesomeIcon className='editProductBtn'  icon={faEdit} onClick={()=>editProductDetails(product)} />
-          <FontAwesomeIcon className='addProductToCartBtn'   icon={faCartPlus} onClick={()=>actions.addProductToCart(product.productName)} />
+          <FontAwesomeIcon className='editProductBtn' icon={faEdit} onClick={()=>editProductDetails(prod)} />
+          <FontAwesomeIcon className='addProductToCartBtn' icon={faCartPlus} onClick={()=>actions.addProductToCart(productId)} />
           </div>
-         
+      </div>
+      </li>
+      )
+  })
+  return tmpArr
+  }
+
+  const _productsByCategoryy=()=>{
+    const prodctsDesign:any=[]
+    products.forEach((product,key) => {
+      prodctsDesign.push(  
+        <div className='products-row-parent'>
+          <h3 style={{fontFamily:'serif'}}>{categories.getKey(key)}</h3>
+          <ul className='products-horizontal-list' >
+           {  tes(product)   }
+          </ul>
         </div>
-        )
+      )
     });
-    return prod
+
+    return prodctsDesign
   }
 
   return (
@@ -84,9 +101,10 @@ function Home() {
         
         <div className="homeNavbarAndProductGridParen">
           <div><HomeNavBar /></div>
-          <div className='productGrid'>{_productsByCategory()}</div>
+          <div className='productGrid'>
+             {_productsByCategoryy()}
+          </div>
         </div>
-       
       </div>
       <SimpleSpinnerModal isVisible={isLoading}/>
       <SimpleMessageModal 
